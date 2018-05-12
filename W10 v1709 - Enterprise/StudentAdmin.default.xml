@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <settings pass="windowsPE">
+        <component name="Microsoft-Windows-International-Core-WinPE"
+                   processorArchitecture="amd64"
+                   language="neutral"
+                   publicKeyToken="31bf3856ad364e35"
+                   versionScope="nonSxS">
+            <UILanguage>en-US</UILanguage>
+        </component>
+        <component name="Microsoft-Windows-Setup"
+                   processorArchitecture="amd64"
+                   language="neutral"
+                   publicKeyToken="31bf3856ad364e35"
+                   versionScope="nonSxS"
+                   xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+            <ImageInstall>
+                <OSImage>
+                    <InstallToAvailablePartition>true</InstallToAvailablePartition>
+                </OSImage>
+            </ImageInstall>
+            <UserData>
+                <AcceptEula>true</AcceptEula>
+            </UserData>
+            <DiskConfiguration>
+                <Disk wcm:action="add">
+                    <DiskID>0</DiskID>
+                    <CreatePartitions>
+                        <CreatePartition wcm:action="add">
+                            <Order>1</Order>
+                            <Type>EFI</Type>
+                            <Size>100</Size>
+                        </CreatePartition>
+                        <CreatePartition wcm:action="add">
+                            <Order>2</Order>
+                            <Type>Primary</Type>
+                            <Extend>true</Extend> 
+                       </CreatePartition>
+                    </CreatePartitions>
+                </Disk>
+            </DiskConfiguration>
+        </component>
+    </settings>
+    <settings pass="specialize">
+        <component name="Microsoft-Windows-Shell-Setup"
+                   processorArchitecture="amd64"
+                   language="neutral"
+                   publicKeyToken="31bf3856ad364e35"
+                   versionScope="nonSxS">
+            <ComputerName>*</ComputerName>
+        </component>
+    </settings>
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-International-Core"
+                   processorArchitecture="amd64"
+                   language="neutral"
+                   publicKeyToken="31bf3856ad364e35"
+                   versionScope="nonSxS">
+            <SystemLocale>en-us</SystemLocale>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup"
+                   processorArchitecture="amd64"
+                   language="neutral"
+                   publicKeyToken="31bf3856ad364e35"
+                   versionScope="nonSxS"
+                   xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+            <TimeZone>Eastern Standard Time</TimeZone>
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <ProtectYourPC>1</ProtectYourPC>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+            </OOBE>
+            <UserAccounts>
+                <AdministratorPassword>
+                    <Value>UABhACQAJAB3ADAAcgBkAEEAZABtAGkAbgBpAHMAdAByAGEAdABvAHIAUABhAHMAcwB3AG8AcgBkAA==</Value>
+                    <PlainText>false</PlainText>
+                </AdministratorPassword>
+                <LocalAccounts>
+                    <LocalAccount wcm:action="add">
+                        <Password>
+                            <Value>UABhACQAJAB3ADAAcgBkAFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                            <PlainText>false</PlainText>
+                        </Password>
+                        <DisplayName>StudentAdmin</DisplayName>
+                        <Group>Administrators</Group>
+                        <Name>StudentAdmin</Name>
+                    </LocalAccount>
+                </LocalAccounts>
+            </UserAccounts>
+            <AutoLogon>
+                <Enabled>true</Enabled>
+                <Username>StudentAdmin</Username>
+                <Password>
+                    <Value>UABhACQAJAB3ADAAcgBkAFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                    <PlainText>false</PlainText>
+                </Password>
+                <LogonCount>1</LogonCount>
+            </AutoLogon>
+            <FirstLogonCommands>
+                <SynchronousCommand wcm:action="add">
+                    <Order>1</Order>
+                    <CommandLine>reg add HKLM\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell /v ExecutionPolicy /d RemoteSigned /f</CommandLine>
+                    <Description>Permit running local powershell scripts. (Required for post-unattend PowerShell configuration).</Description>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>2</Order>
+                    <CommandLine>net ACCOUNTS /MAXPWAGE:UNLIMITED</CommandLine>
+                    <Description>Passwords never expire. (Password changes mandated by the operating system disrupt class.)</Description>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>3</Order>
+                    <CommandLine>powercfg /setacvalueindex SCHEME_BALANCED SUB_SLEEP STANDBYIDLE 0</CommandLine>
+                    <Description>Sleep behavior disabled in default power configuration. (Sleep behavior confuses students and disrupts class.)</Description>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>4</Order>
+                    <CommandLine>C:\Windows\System32\WindowsPowershell\v1.0\powershell.exe -noninteractive -command $path = 'C:\CT\script.ps1'; if (Test-Path $path) {. $path;}</CommandLine>
+                    <Description>Process a post-unattend PowerShell configuration script, if found at the expected location.</Description>
+                </SynchronousCommand>
+            </FirstLogonCommands>
+        </component>
+    </settings>
+</unattend>
